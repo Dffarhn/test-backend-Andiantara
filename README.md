@@ -8,6 +8,12 @@ Backend REST API untuk manajemen inventaris barang, menggunakan:
 - PostgreSQL
 - JWT Authentication
 
+Base URL (default): `http://localhost:3000`
+
+### Author
+
+Muhammad Daffa Raihan
+
 ### Menjalankan Project
 
 1. Install dependency:
@@ -16,15 +22,19 @@ Backend REST API untuk manajemen inventaris barang, menggunakan:
 npm install
 ```
 
-2. Siapkan database PostgreSQL dan buat database sesuai `DB_NAME`.
+2. Siapkan environment variable:
 
-3. Jalankan migration (menggunakan script TypeScript):
+- Copy `.env.example` menjadi `.env`, lalu isi nilainya sesuai environment kamu.
+
+3. Siapkan database PostgreSQL dan buat database sesuai `DB_NAME`.
+
+4. Jalankan migration (menggunakan script TypeScript):
 
 ```bash
 npm run migrate
 ```
 
-4. Jalankan server (development):
+5. Jalankan server (development):
 
 ```bash
 npm run dev
@@ -32,7 +42,7 @@ npm run dev
 
 ### Environment Variables
 
-Lihat `.env.example`:
+Lihat contoh di `.env.example`. Variable yang digunakan:
 
 - `PORT`
 - `DB_HOST`
@@ -45,6 +55,7 @@ Lihat `.env.example`:
 
 ### Endpoint Utama
 
+- `GET /health`
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/items`
@@ -54,6 +65,12 @@ Lihat `.env.example`:
 - `PATCH /api/items/:id/stock`
 - `GET /api/items/:id/activities`
 - `DELETE /api/items/:id`
+
+### Postman Collection
+
+File collection tersedia di: `Inventory Management API - Muhammad Daffa Raihan.postman_collection.json`.
+
+Alternatif (online docs): `https://www.postman.com/material-explorer-83708155/workspace/testbackend/request/41538267-08c6d085-3233-48c5-b747-ecccb6c39747?action=share&creator=41538267&ctx=documentation`.
 
 Seluruh response menggunakan format:
 

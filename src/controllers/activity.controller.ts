@@ -10,7 +10,15 @@ export const getItemActivitiesController = async (
   try {
     const { id } = req.params;
     const logs = await getItemActivities(id);
-    successResponse(res, 'Activity logs fetched successfully', logs, 200);
+    const data = logs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      quantity: log.quantity,
+      createdAt: log.createdAt,
+      user: log.user,
+      item: log.item,
+    }));
+    successResponse(res, 'Activity logs fetched successfully', data, 200);
   } catch (error) {
     next(error);
   }

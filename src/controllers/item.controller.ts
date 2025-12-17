@@ -93,7 +93,14 @@ export const updateItemStockController = async (
       'Stock updated successfully',
       {
         item: result.item,
-        activity: result.activity,
+        activity: {
+          id: result.activity.id,
+          action: result.activity.action,
+          quantity: result.activity.quantity,
+          createdAt: result.activity.createdAt,
+          user: result.activity.user,
+          item: result.activity.item,
+        },
       },
       200,
     );

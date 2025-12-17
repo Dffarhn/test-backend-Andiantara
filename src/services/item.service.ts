@@ -13,6 +13,12 @@ import { AppError } from '../middlewares/app-error';
 import { ActivityLog, ActivityAction } from '../models/activity.model';
 import { logStockChange } from './activity.service';
 
+const isUuid = (value: string): boolean => {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+};
+
 export interface CreateItemPayload {
   name: string;
   description?: string;
@@ -43,6 +49,10 @@ export const createItemService = async (
     throw new AppError('Name is required', 400);
   }
 
+  if (stock !== undefined && (typeof stock !== 'number' || Number.isNaN(stock))) {
+    throw new AppError('Stock must be a number', 400);
+  }
+
   if (stock !== undefined && stock < 0) {
     throw new AppError('Initial stock cannot be negative', 400);
   }
@@ -68,6 +78,10 @@ export const getItemByIdService = async (id: string): Promise<Item> => {
     throw new AppError('Item ID is required', 400);
   }
 
+  if (!isUuid(id)) {
+    throw new AppError('Item ID must be a valid UUID', 400);
+  }
+
   const item = await getItemById(id);
 
   if (!item) {
@@ -83,6 +97,10 @@ export const updateItemDetailsService = async (
 ): Promise<Item> => {
   if (!id) {
     throw new AppError('Item ID is required', 400);
+  }
+
+  if (!isUuid(id)) {
+    throw new AppError('Item ID must be a valid UUID', 400);
   }
 
   const hasName: boolean = payload.name !== undefined;
@@ -124,6 +142,10 @@ export const updateItemStockService = async (
 ): Promise<UpdateStockResult> => {
   if (!id) {
     throw new AppError('Item ID is required', 400);
+  }
+
+  if (!isUuid(id)) {
+    throw new AppError('Item ID must be a valid UUID', 400);
   }
 
   if (!userId) {
@@ -170,6 +192,10 @@ export const updateItemStockService = async (
 export const deleteItemService = async (id: string): Promise<void> => {
   if (!id) {
     throw new AppError('Item ID is required', 400);
+  }
+
+  if (!isUuid(id)) {
+    throw new AppError('Item ID must be a valid UUID', 400);
   }
 
   const existingItem = await getItemById(id);
