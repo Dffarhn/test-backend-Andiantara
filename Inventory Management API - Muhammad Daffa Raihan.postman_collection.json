@@ -1,0 +1,380 @@
+{
+	"info": {
+		"_postman_id": "227b7d99-8d14-4d66-8020-f734d53ce89a",
+		"name": "Inventory Management API - Muhammad Daffa Raihan",
+		"description": "Postman collection untuk Inventory Management API milik Muhammad Daffa Raihan.\n\nCollection ini mencakup:\n- Auth (Register & Login)\n- Items CRUD (Create, Read, Update details, Delete)\n- Update Stock dengan aturan bisnis (IN/OUT, tidak boleh negatif)\n- Activity Logs untuk setiap perubahan stok\n\nDirancang untuk demo/tes backend dengan struktur folder rapi dan response yang konsisten.\n\n**CARA PENGGUNAAN:**\n1. Import collection ini ke Postman\n2. Pastikan variable {{base_url}} sudah diset (default: http://localhost:3000)\n3. Jalankan request Register terlebih dahulu\n4. Jalankan request Login - token akan otomatis tersimpan\n5. Semua request lainnya akan otomatis menggunakan Bearer token dari login",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41538267",
+		"_collection_link": "https://www.postman.com/material-explorer-83708155/workspace/testbackend/collection/41538267-227b7d99-8d14-4d66-8020-f734d53ce89a?action=share&source=collection_link&creator=41538267"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Daffa\",\n  \"email\": \"daffa@gmail.com\",\n  \"password\": \"daffa123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = null;",
+									"try {",
+									"  json = pm.response.json();",
+									"} catch (e) {",
+									"  console.log('Tidak bisa parse JSON response login:', e);",
+									"}",
+									"",
+									"if (json) {",
+									"  // Coba ambil token dari beberapa kemungkinan struktur response",
+									"  let token = null;",
+									"  if (json.data && json.data.token) {",
+									"    token = json.data.token;",
+									"  } else if (json.token) {",
+									"    token = json.token;",
+									"  } else if (json.data && json.data.accessToken) {",
+									"    token = json.data.accessToken;",
+									"  } else if (json.accessToken) {",
+									"    token = json.accessToken;",
+									"  }",
+									"",
+									"  if (token) {",
+									"    // Simpan ke collection variable supaya semua request otomatis pakai",
+									"    pm.collectionVariables.set('token', token);",
+									"    console.log('✅ Token berhasil diset! Semua request sekarang akan otomatis menggunakan Bearer token ini.');",
+									"  } else {",
+									"    console.log('❌ Token tidak ditemukan di response login. Periksa struktur response API Anda.');",
+									"  }",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"daffa@gmail.com\",\n  \"password\": \"daffa123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Kumpulan request untuk autentikasi user (register & login) menggunakan JWT."
+		},
+		{
+			"name": "Items",
+			"item": [
+				{
+					"name": "Create Item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Laptop Gaming\",\n  \"description\": \"Laptop kantor\",\n  \"stock\": 90\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Items",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/items",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Item By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/items/{{item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"items",
+								"{{item_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item Stock",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"IN\" , //Pilihan type adalah IN atau OUT\n  \"quantity\": 100\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/items/{{item_id}}/stock",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"items",
+								"{{item_id}}",
+								"stock"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Item Details",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Laptop Asus Pro MAX\",\n  \"description\": \"Laptop kantor - updated\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/items/{{item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"items",
+								"{{item_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Item",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/items/{{item_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"items",
+								"{{item_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Kumpulan request untuk manajemen item inventaris dan update stok.\n\n**Authorization:** Semua request di folder ini otomatis menggunakan Bearer token dari collection variable {{token}}"
+		},
+		{
+			"name": "Activities",
+			"item": [
+				{
+					"name": "Get Item Activities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/items/{{item_id}}/activities",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"items",
+								"{{item_id}}",
+								"activities"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Item Activities - Example Response",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/items/{{item_id}}/activities",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"items",
+										"{{item_id}}",
+										"activities"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Activity logs fetched successfully\",\n  \"data\": [\n    {\n      \"id\": \"c2f9a4d0-2c6b-4f20-9f11-abcdef123456\",\n      \"itemId\": \"{{item_id}}\",\n      \"userId\": \"{{user_id_example}}\",\n      \"action\": \"IN\",\n      \"quantity\": 5,\n      \"createdAt\": \"2025-01-02T08:30:00.000Z\"\n    },\n    {\n      \"id\": \"d3a0b5e1-3d7c-5a31-af22-fedcba654321\",\n      \"itemId\": \"{{item_id}}\",\n      \"userId\": \"{{user_id_example}}\",\n      \"action\": \"OUT\",\n      \"quantity\": 2,\n      \"createdAt\": \"2025-01-03T09:15:00.000Z\"\n    }\n  ]\n}"
+						}
+					]
+				}
+			],
+			"description": "Kumpulan request untuk melihat activity logs (riwayat perubahan stok) per item.\n\n**Authorization:** Semua request di folder ini otomatis menggunakan Bearer token dari collection variable {{token}}"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "item_id",
+			"value": ""
+		},
+		{
+			"key": "user_id_example",
+			"value": "11111111-2222-3333-4444-555555555555"
+		}
+	]
+}
