@@ -9,7 +9,8 @@ export const getItemActivitiesController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const logs = await getItemActivities(id);
+    const userId = req.user?.id;
+    const logs = await getItemActivities(id, userId ?? '');
     const data = logs.map((log) => ({
       id: log.id,
       action: log.action,

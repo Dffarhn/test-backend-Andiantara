@@ -5,6 +5,7 @@ import {
   getActivityLogsByItemId,
 } from '../models/activity.model';
 import { AppError } from '../middlewares/app-error';
+import { getItemById } from '../models/item.model';
 
 const isUuid = (value: string): boolean => {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -46,6 +47,7 @@ export const logStockChange = async (
 
 export const getItemActivities = async (
   itemId: string,
+  userId: string,
 ): Promise<ActivityLog[]> => {
   if (!itemId) {
     throw new AppError('Item ID is required', 400);
@@ -53,6 +55,21 @@ export const getItemActivities = async (
 
   if (!isUuid(itemId)) {
     throw new AppError('Item ID must be a valid UUID', 400);
+  }
+
+  if (!userId) {
+    throw new AppError('User ID is required', 400);
+  }
+
+  // Check existence and ownership directly from model to avoid circular dependency
+  const item = await getItemById(itemId);
+
+  if (!item) {
+    throw new AppError('Item not found', 404);
+  }
+
+  if (item.createdBy.id !== userId) {
+    throw new AppError('Access denied: You do not own this item', 403);
   }
 
   const logs = await getActivityLogsByItemId(itemId);

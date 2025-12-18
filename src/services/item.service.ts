@@ -68,12 +68,12 @@ export const createItemService = async (
   return item;
 };
 
-export const getItemsService = async (): Promise<Item[]> => {
-  const items = await getItems();
+export const getItemsService = async (userId: string): Promise<Item[]> => {
+  const items = await getItems(userId);
   return items;
 };
 
-export const getItemByIdService = async (id: string): Promise<Item> => {
+export const getItemByIdService = async (id: string, userId: string): Promise<Item> => {
   if (!id) {
     throw new AppError('Item ID is required', 400);
   }
@@ -88,12 +88,17 @@ export const getItemByIdService = async (id: string): Promise<Item> => {
     throw new AppError('Item not found', 404);
   }
 
+  if (item.createdBy.id !== userId) {
+    throw new AppError('Access denied: You do not own this item', 403);
+  }
+
   return item;
 };
 
 export const updateItemDetailsService = async (
   id: string,
   payload: UpdateItemDetailsPayload,
+  userId: string,
 ): Promise<Item> => {
   if (!id) {
     throw new AppError('Item ID is required', 400);
@@ -110,11 +115,8 @@ export const updateItemDetailsService = async (
     throw new AppError('At least one field (name or description) is required', 400);
   }
 
-  const existingItem = await getItemById(id);
-
-  if (!existingItem) {
-    throw new AppError('Item not found', 404);
-  }
+  // Check existence and ownership
+  await getItemByIdService(id, userId);
 
   const input: UpdateItemDetailsInput = {
     name: payload.name,
@@ -162,11 +164,8 @@ export const updateItemStockService = async (
     throw new AppError('Quantity must be greater than 0', 400);
   }
 
-  const item = await getItemById(id);
-
-  if (!item) {
-    throw new AppError('Item not found', 404);
-  }
+  // Check existence and ownership
+  const item = await getItemByIdService(id, userId);
 
   const delta = type === 'IN' ? quantity : -quantity;
   const newStock = item.stock + delta;
@@ -189,7 +188,7 @@ export const updateItemStockService = async (
   };
 };
 
-export const deleteItemService = async (id: string): Promise<void> => {
+export const deleteItemService = async (id: string, userId: string): Promise<void> => {
   if (!id) {
     throw new AppError('Item ID is required', 400);
   }
@@ -198,11 +197,8 @@ export const deleteItemService = async (id: string): Promise<void> => {
     throw new AppError('Item ID must be a valid UUID', 400);
   }
 
-  const existingItem = await getItemById(id);
-
-  if (!existingItem) {
-    throw new AppError('Item not found', 404);
-  }
+  // Check existence and ownership
+  await getItemByIdService(id, userId);
 
   await deleteItem(id);
 };

@@ -82,7 +82,7 @@ export const createItem = async (input: CreateItemInput): Promise<Item> => {
   return created;
 };
 
-export const getItems = async (): Promise<Item[]> => {
+export const getItems = async (userId: string): Promise<Item[]> => {
   const query = `
     SELECT
       i.id,
@@ -96,10 +96,11 @@ export const getItems = async (): Promise<Item[]> => {
       u.email AS created_by_email
     FROM items i
     JOIN users u ON u.id = i.created_by
+    WHERE i.created_by = $1
     ORDER BY i.created_at DESC
   `;
 
-  const result = await dbPool.query<ItemRow>(query);
+  const result = await dbPool.query<ItemRow>(query, [userId]);
 
   return result.rows.map(mapItemRow);
 };

@@ -39,12 +39,13 @@ export const createItem = async (
 };
 
 export const getItemsController = async (
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const items = await getItemsService();
+    const userId = req.user?.id;
+    const items = await getItemsService(userId ?? '');
     successResponse(res, 'Items fetched successfully', items, 200);
   } catch (error) {
     next(error);
@@ -58,7 +59,8 @@ export const getItemByIdController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const item = await getItemByIdService(id);
+    const userId = req.user?.id;
+    const item = await getItemByIdService(id, userId ?? '');
     successResponse(res, 'Item fetched successfully', item, 200);
   } catch (error) {
     next(error);
@@ -121,10 +123,16 @@ export const updateItemDetailsController = async (
       description?: string;
     };
 
-    const updated = await updateItemDetailsService(id, {
-      name,
-      description,
-    });
+    const userId = req.user?.id;
+
+    const updated = await updateItemDetailsService(
+      id,
+      {
+        name,
+        description,
+      },
+      userId ?? '',
+    );
 
     successResponse(res, 'Item updated successfully', updated, 200);
   } catch (error) {
@@ -139,8 +147,9 @@ export const deleteItemController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
+    const userId = req.user?.id;
 
-    await deleteItemService(id);
+    await deleteItemService(id, userId ?? '');
 
     successResponse(res, 'Item deleted successfully', null, 200);
   } catch (error) {
